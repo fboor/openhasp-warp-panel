@@ -18,6 +18,28 @@ charger's own web interface.
 > installation writes before you rely on this display for controlling a charging session, and
 > use it at your own risk.
 
+## Quickstart
+
+1. Copy `openhasp/pages.jsonl` to `/pages.jsonl` on the plate (web interface → *File Editor*,
+   or FTP). Optionally also the header logo → `/warp-logo.png`; it is not committed, run
+   `python3 tools/fetch_warp_logo.py` first (see step 1.2 below).
+2. Copy `openhasp/config.example.json` through *Configuration → MQTT/Wifi Settings* and fill in
+   your Wi-Fi, broker and plate name (`mqtt.name`); keep `hasp.pages` = `/pages.jsonl`
+   and `hasp.startpage` = `1`.
+3. Reboot the plate — the static layout shows up right away, still without live values.
+4. Enable MQTT in the charger's web interface and note its topic prefix, e.g. `warp3/AbCd`.
+5. In Node-RED: *Menu → Import → Clipboard*, paste `nodered/warp-display.json`. Set your broker
+   in the node **controller**, set `WARP_DEV` and `HASP_PLATE` in the tab **WARP-Display** *Env*,
+   then *Deploy*.
+6. Check that values arrive:
+
+   ```console
+   mosquitto_sub -h <broker> -u <user> -P <password> -t 'hasp/<HASP_PLATE>/#' -v
+   ```
+
+Within a few seconds of the deploy, the display fills with values. If something stays empty,
+[Installation](#installation) lists the details and where to look.
+
 ![Status page](docs/screenshot.png)
 
 *Status page — charge mode, charging state, power, phase switch.*
