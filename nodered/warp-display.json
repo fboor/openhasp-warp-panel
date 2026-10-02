@@ -1,0 +1,730 @@
+[
+    {
+        "id": "wt50cef7629f8e5a01",
+        "type": "tab",
+        "label": "WARP-Display",
+        "disabled": false,
+        "info": "Steuerdisplay für die WARP-Wallbox.\n\nGerätetopics zentral ändern: Tab-Env „WARP_DEV“ und „HASP_PLATE“ – die mqtt-in-Knoten holen ihre Abos automatisch (Dynamic Subscription über „MQTT-Abos aus Konfiguration“).",
+        "env": [
+            {
+                "name": "WARP_DEV",
+                "value": "warp3/AbCd",
+                "type": "str"
+            },
+            {
+                "name": "HASP_PLATE",
+                "value": "openhasp",
+                "type": "str"
+            }
+        ]
+    },
+    {
+        "id": "wtef260b9000001a",
+        "type": "comment",
+        "z": "wt50cef7629f8e5a01",
+        "name": "⚙ KONFIGURATION – Gerätetopics",
+        "info": "Gerätetopics zentral anpassen – NUR hier, keine Topic-Felder pflegen:\nTab-Env (Tab oben rechts → „Env“):\n  • WARP_DEV   = Topic-Präfix der Wallbox, z.B. warp3/AbCd\n  • HASP_PLATE = OpenHASP-Plattenname, z.B. openhasp\nDer Knoten „Konfiguration (WARP/OpenHASP)“ übernimmt die Env in die globalen\nVariablen (warpDev / haspPlate); „MQTT-Abos aus Konfiguration“ meldet damit\nbeide Abos an die mqtt-in-Knoten (Dynamic Subscription):\n  • warp-in  → <WARP_DEV>/#\n  • hasp-in  → hasp/<HASP_PLATE>/state/p1b42|p1b78|p2b31|p2b32 (gezielt, kein #)",
+        "x": 140,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "wt0a111111111111",
+        "type": "inject",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Konfiguration & Abos laden (alle 5 Min.)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.5",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 80,
+        "wires": [
+            [
+                "wt0a222222222222"
+            ]
+        ]
+    },
+    {
+        "id": "wt0a222222222222",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Konfiguration (WARP/OpenHASP)",
+        "func": "// ⚙️ ZENTRALE KONFIGURATION – Gerätetopics\n// Quelle sind die Tab-Env-Variablen (Tab oben rechts → „Env“):\n//   WARP_DEV   = Topic-Präfix der WARP-Wallbox, z.B. \"warp3/AbCd\"\n//   HASP_PLATE = Platten-Name der Anzeige  →  Topic hasp/<Plate>/...\n// Die mqtt-in-Knoten abonnieren nichts statisch, sondern bekommen ihre Abos\n// vom Folgeknoten „MQTT-Abos aus Konfiguration“ – hier ändert sich also NUR die Env.\nglobal.set(\"warpDev\", env.get(\"WARP_DEV\") || \"warp3/AbCd\");\nglobal.set(\"haspPlate\", env.get(\"HASP_PLATE\") || \"openhasp\");\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 140,
+        "wires": [
+            [
+                "wt0a333333333333"
+            ]
+        ]
+    },
+    {
+        "id": "wt0a333333333333",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "MQTT-Abos aus Konfiguration (hasp-in / warp-in)",
+        "func": "// 📡 MQTT-ABOS aus der Konfiguration – keine Topics in den mqtt-Knoten pflegen\n// Quelle: Tab-Env (WARP_DEV / HASP_PLATE), gesetzt vom Knoten „Konfiguration (WARP/OpenHASP)“.\n// Beide mqtt-in-Knoten laufen im Modus „Dynamic Subscription“ (inputs: 1) und\n// bekommen ihre Abos von hier – ein Plattenwechsel ist damit NUR eine Env-Änderung.\nvar warpDev   = global.get(\"warpDev\")   || \"warp3/AbCd\";\nvar haspPlate = global.get(\"haspPlate\") || \"openhasp\";\n\n// Ausgabe 1 → warp-in: alle Topics der Wallbox (Ausgabe evse/…/info/…/power_manager/…)\nvar warp = { action: \"subscribe\", topic: { topic: warpDev + \"/#\", qos: 1 } };\n\n// Ausgabe 2 → hasp-in: NUR die Zustände, die der plate-router verarbeitet\n// (kein „#“-Abo). Erweitern → hier UND im plate-router (case \"pXbYY\") ergänzen.\nvar stateObjs = [\"p1b42\", \"p1b78\", \"p2b31\", \"p2b32\"];\nvar haspSubs = stateObjs.map(function (obj) {\n    return { topic: \"hasp/\" + haspPlate + \"/state/\" + obj, qos: 1 };\n});\nvar hasp = { action: \"subscribe\", topic: haspSubs };\n\nreturn [[warp], [hasp]];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// On Start: Abos sofort anmelden, falls dieser Knoten neu startet\n// (gleiche Logik wie im Hauptteil – bei Änderungen beide Blöcke anpassen)\nvar warpDev   = global.get(\"warpDev\")   || \"warp3/AbCd\";\nvar haspPlate = global.get(\"haspPlate\") || \"openhasp\";\nvar objs = [\"p1b42\", \"p1b78\", \"p2b31\", \"p2b32\"];\nreturn [[{ action: \"subscribe\", topic: { topic: warpDev + \"/#\", qos: 1 } }],\n        [{ action: \"subscribe\", topic: objs.map(function (obj) {\n            return { topic: \"hasp/\" + haspPlate + \"/state/\" + obj, qos: 1 };\n        }) }]];",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "wt0b111111111111"
+            ],
+            [
+                "wt0d111111111111"
+            ]
+        ]
+    },
+    {
+        "id": "wt0b111111111111",
+        "type": "mqtt in",
+        "z": "wt50cef7629f8e5a01",
+        "name": "WARP Charger (warp-in) – Abo aus Konfiguration",
+        "topic": "",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "e7409604a57f698d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 1,
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "wt0b222222222222"
+            ]
+        ]
+    },
+    {
+        "id": "wt0b222222222222",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "warp-router",
+        "func": "var t = msg.topic || \"\";\nvar W = (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/\";\nvar out = -1;\nif (t === W + \"power_manager/charge_mode\") out = 0;\nelse if (t === W + \"evse/state\") out = 1;\nelse if (/\\/meters\\/\\d+\\/values$/.test(t)) out = 2;\nelse if (/\\/meters\\/\\d+\\/value_ids$/.test(t)) out = 3;\nelse if (t === W + \"evse/hardware_configuration\") out = 4;\nelse if (t === W + \"evse/phases_connected\") out = 5;\nelse if (/\\/meters\\/\\d+\\/config$/.test(t)) out = 6;\nelse if (t === W + \"mqtt/state\") out = 7;\nelse if (t === W + \"evse/low_level_state\") out = 8;\nelse if (t === W + \"solar_forecast/state\") out = 9;\nelse if (t === W + \"evse/management_current\") out = 10;\nelse if (t === W + \"evse/external_current\") out = 11;\nelse if (t === W + \"evse/automation_current\") out = 14;\nelse if (t === W + \"info/name\") out = 12;\nelse if (t === W + \"info/display_name\") out = 13;\nif (out < 0) return null;\nflow.set(\"lastWarp\", Date.now());\nvar result = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];\nresult[out] = msg;\nreturn result;",
+        "outputs": 15,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 280,
+        "wires": [
+            [
+                "wt0c111111111111"
+            ],
+            [
+                "wt0c222222222222"
+            ],
+            [
+                "wt0c444444444444"
+            ],
+            [
+                "wt0c555555555555"
+            ],
+            [
+                "wt0h000000000001"
+            ],
+            [
+                "wt0c888888888888"
+            ],
+            [
+                "wt0c999999999999"
+            ],
+            [
+                "wt0c57ab0001"
+            ],
+            [
+                "wt0c57ab0002",
+                "wt0f333333333333"
+            ],
+            [
+                "wt0g000000000006"
+            ],
+            [
+                "wt0g000000000002"
+            ],
+            [
+                "wt0g000000000003"
+            ],
+            [
+                "wt0g000000000007"
+            ],
+            [
+                "wt0g000000000007"
+            ],
+            [
+                "wt0g000000000003"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c111111111111",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "mode → Lademodus (p1b42)",
+        "func": "var m = Number(msg.payload && msg.payload.mode);\nvar idx = (m === 1) ? 0 : (m === 2) ? 1 : (m === 3) ? 2 : 3;\nmsg.payload = idx;\nmsg.topic = \"hasp/\" + (global.get(\"haspPlate\") || \"openhasp\") + \"/command/p1b42.val\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1100,
+        "y": 40,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c222222222222",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse → Anzeige",
+        "func": "var H = (global.get(\"haspPlate\") || \"openhasp\");\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\") return null;\nflow.set(\"lastWarp\", Date.now());\nflow.set(\"warpState\", s);   // letzter evse/state (für Phasen-Anzeige: lädt vs. idle)\n\nfunction txt(id, payload) { return { topic: \"hasp/\" + H + \"/command/\" + id + \".text\", payload: String(payload) }; }\n\n\nvar cs = s.charger_state;\nvar plain  = [\"getrennt\", \"warten\", \"ladebereit\", \"lädt\", \"Fehler\"][cs] || \"?\";\nvar marked = [\"getrennt\", \"warten\", \"ladebereit\", \"#009000 lädt#\", \"#900000 Fehler#\"][cs] || \"?\";\n\nvar iec = [\"A – nicht verbunden\", \"B – verbunden\", \"C – lädt\", \"D – lädt (Belüftung)\", \"E/F – Fehler\"][s.iec61851_state] || \"?\";\nvar cont = s.contactor_state;\nvar contText = (cont === 3) ? \"geschlossen\" : (cont === 1 || cont === 2) ? \"nicht geschlossen\" : \"inaktiv\";\nvar err = s.error_state;\nvar errText = (err === 0 || err === undefined) ? \"kein Fehler\"\n    : [\"\", \"\", \"Schalterfehler\", \"DC-Fehlerstrom\", \"Schützfehler\", \"Kommunikationsfehler\"][err] || (\"Fehler \" + err);\nvar errDisp = (err === 0 || err === undefined) ? \"kein Fehler\" : (\"#900000 \" + errText + \"#\");\n\nvar allowed = s.allowed_charging_current || 0;\nvar freigabe = (allowed > 0) ? \"ja\" : \"nein\";\n// Phasen: live (phases_current, evse/low_level_state) → Konfig (phases_connected) → Kontaktor-Fallback\nvar phasen = flow.get(\"phasenLive\");\nif (phasen !== 1 && phasen !== 3) phasen = flow.get(\"phasen\");\nif (phasen !== 1 && phasen !== 3) phasen = (s.contactor_state & 16) ? 3 : 1;\nvar phasenText = (phasen === 3) ? \"3-phasig\" : \"1-phasig\";\n// Leistung: Slot 0 vorhanden (meterW_0 gesetzt) -> dessen Leistung anzeigen (auch 0),\n// sonst die bereitgestellte Leistung: Spannung (230 V) x Ladestrom x Phasen.\n// Anzeige in beiden Fällen gerundet auf 0,1 kW.\nvar actW = flow.get(\"meterW_0\");\nvar kwText;\nif (typeof actW === \"number\" && isFinite(actW)) {\n    kwText = (actW / 1000).toFixed(1).replace(\".\", \",\") + \" kW\";\n} else {\n    var kw = (allowed * 230 * phasen) / 1000000;\n    kwText = kw.toFixed(1).replace(\".\", \",\") + \" kW\";\n}\nvar aText = (allowed / 1000).toFixed(0) + \" A\";\n\n// Ladestatus-Footer (p1b13): ohne „Freigabe“\nvar sub = (freigabe === \"ja\") ? (aText + \" · \" + phasenText) : \"kein Ladestrom\";\n\n// Sidebar-Lade-Icon (p0b90): Auto-Symbol E10B — Farbe je nach Ladestatus, „getrennt“ = unsichtbar\nvar iconColor = [\"#9ca3af\", \"#ffd75e\", \"#62ddf5\", \"#6ab190\", \"#cc0000\"][cs] || \"#9ca3af\";\nvar iconVis = (cs !== 0);\n\nreturn [\n    txt(\"p1b12\", marked),\n    txt(\"p1b13\", sub),\n    txt(\"p1b22\", kwText),\n    txt(\"p3b11\", iec),\n    txt(\"p3b12\", plain),\n    txt(\"p3b13\", contText),\n    txt(\"p3b14\", errDisp),\n    txt(\"p3b15\", freigabe),\n    { topic: \"hasp/\" + H + \"/command/p0b90.text_color\", payload: iconColor },\n    { topic: \"hasp/\" + H + \"/command/p0b90.vis\", payload: String(iconVis) }\n];",
+        "outputs": 10,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 220,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c444444444444",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "meter values → Zähler (p4b201-225, Dots 180-194)",
+        "func": "var H = (global.get(\"haspPlate\") || \"openhasp\");\nvar vals = msg.payload;\nif (!Array.isArray(vals)) return null;\nvar parts = String(msg.topic || \"\").split(\"/\");\nvar slot = parseInt(parts[parts.length - 2], 10);\nif (!isFinite(slot) || slot < 0 || slot > 4) return null;\nvar map = flow.get(\"mvids_\" + slot);\nif (!map) return null;\nfunction g(id) {\n    var i = map[id];\n    if (i === undefined || i === null) return null;\n    var v = vals[i];\n    return (typeof v === \"number\" && isFinite(v)) ? v : null;\n}\nfunction fmt(v, unit, dec) {\n    if (v === null || v === undefined) return \"--\";\n    var neg = v < 0;\n    var p = Math.abs(v).toFixed(dec).split(\".\");\n    p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, \" \");\n    return (neg ? \"-\" : \"\") + p.join(\",\") + \" \" + unit;\n}\nfunction txt(id, payload) { return { topic: \"hasp/\" + H + \"/command/\" + id + \".text\", payload: String(payload) }; }\nfunction col(id, payload) { return { topic: \"hasp/\" + H + \"/command/\" + id + \".bg_color\", payload: String(payload) }; }\n\n// Leistung: AC-Summe (74) → DC (404) → DC Laden/Entladen (403)\nvar w = g(74); if (w === null) w = g(404); if (w === null) w = g(403);\n// tatsaechliche Leistung in Watt je Zaehler-Slot fuer die Leistungs-Anzeige (p1b22) vorhalten\nflow.set(\"meterW_\" + slot, (typeof w === \"number\" && isFinite(w)) ? w : null);\nvar pow = (w === null) ? \"--\" : (Math.abs(w) >= 1000) ? fmt(w / 1000, \"kW\", 2) : fmt(w, \"W\", 0);\n\n// Ladestand (nur DC-Reporting / EV-fähige Zähler)\nvar soc = g(387);\nvar socText = (soc === null) ? \"--\" : fmt(soc, \"%\", 0);\n\n// Phasen: Spannung > 180 V → c (verbunden), Strom > 0,3 A → a (aktiv), sonst d (ohne)\nvar state = [\"?\", \"?\", \"?\"];\nvar vols = [g(1), g(2), g(3)];\nvar imports = [g(11), g(15), g(19)];\nvar exports = [g(12), g(16), g(20)];\nvar sums    = [g(13), g(17), g(21)];\nvar diffs   = [g(14), g(18), g(22)];\nvar i;\nfor (i = 0; i < 3; i++) {\n    if (vols[i] !== null && vols[i] !== undefined) state[i] = (vols[i] > 180) ? \"c\" : \"d\";\n    var cur = null;\n    if (imports[i] !== null && imports[i] !== undefined) cur = imports[i];\n    else if (exports[i] !== null && exports[i] !== undefined) cur = exports[i];\n    else if (sums[i] !== null && sums[i] !== undefined) cur = sums[i];\n    if (cur !== null && cur > 0.3) state[i] = \"a\";\n    else if (diffs[i] !== null && diffs[i] !== undefined && Math.abs(diffs[i]) > 0.3) state[i] = \"a\";\n}\n\nvar name = flow.get(\"meterName_\" + slot) || (\"Zähler #\" + slot);\nvar PCOLORS = { \"?\": \"#9ca3af\", \"d\": \"#9ca3af\", \"c\": \"#2563eb\", \"a\": \"#009000\" };\nvar d = 180 + slot * 3;\nreturn [\n    txt(\"p4b\" + (201 + slot), name),\n    txt(\"p4b\" + (211 + slot), pow),\n    txt(\"p4b\" + (221 + slot), socText),\n    col(\"p4b\" + d, PCOLORS[state[0]]),\n    col(\"p4b\" + (d + 1), PCOLORS[state[1]]),\n    col(\"p4b\" + (d + 2), PCOLORS[state[2]])\n];",
+        "outputs": 8,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 520,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ],
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c555555555555",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "meter value_ids merken (pro Slot)",
+        "func": "if (Array.isArray(msg.payload)) {\n    var parts = String(msg.topic || \"\").split(\"/\");\n    var slot = parseInt(parts[parts.length - 2], 10);\n    if (!isNaN(slot) && slot >= 0 && slot <= 4) {\n        var map = {};\n        msg.payload.forEach(function (v, i) { map[v] = i; });\n        flow.set(\"mvids_\" + slot, map);\n    }\n}\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1480,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "wt0d111111111111",
+        "type": "mqtt in",
+        "z": "wt50cef7629f8e5a01",
+        "name": "OpenHASP (hasp-in) – Zustände der Platte",
+        "topic": "",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "e7409604a57f698d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 1,
+        "x": 260,
+        "y": 740,
+        "wires": [
+            [
+                "wt0d222222222222"
+            ]
+        ]
+    },
+    {
+        "id": "wt0d222222222222",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "plate-router",
+        "func": "var obj = String(msg.topic || \"\").split(\"/\").pop();\nswitch (obj) {\n    case \"p1b42\": return [msg, null, null, null];\n    case \"p1b78\": return [null, msg, null, null];\n    case \"p2b31\": return [null, null, msg, null];\n    case \"p2b32\": return [null, null, null, msg];\n    default: return null;\n}",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 740,
+        "wires": [
+            [
+                "wt0d555555555555"
+            ],
+            [
+                "wt0d57ab0003"
+            ],
+            [
+                "wt0g000000000004"
+            ],
+            [
+                "wt0g000000000005"
+            ]
+        ]
+    },
+    {
+        "id": "wt0d555555555555",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Lademodus (p1b42) → charge_mode_update",
+        "func": "var v = (msg.payload && msg.payload.val);\nif (v === undefined || v === null) return null;\nvar modes = [1, 2, 3, 0];   // Aus→Off(1), Solar→PV(2), Minimum→Min+PV(3), Schnell→Fast(0)\nvar m = modes[Number(v)];\nif (m === undefined) return null;\nmsg.payload = { mode: m };\nmsg.topic = (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/power_manager/charge_mode_update\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 700,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0e111111111111",
+        "type": "inject",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Watchdog-Check",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "15",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 840,
+        "wires": [
+            [
+                "wt0g000000000001"
+            ]
+        ]
+    },
+    {
+        "id": "wt0f333333333333",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Temp (evse/low_level_state) → Ladestatus (p3b16)",
+        "func": "var raw;\nif (msg.payload && typeof msg.payload === \"object\" && msg.payload.temperature !== undefined) raw = Number(msg.payload.temperature);\nelse raw = Number(msg.payload);\nif (isNaN(raw)) return null;\n\nvar t = Math.round(raw / 100);\n\nvar H = global.get(\"haspPlate\") || \"openhasp\";\nmsg.topic   = \"hasp/\" + H + \"/command/p3b16.text\";\nmsg.payload = t + \"°C\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 400,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wtf00a4321b0d4c2e0",
+        "type": "mqtt out",
+        "z": "wt50cef7629f8e5a01",
+        "name": "mqtt-out  (Topic aus msg.topic)",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e7409604a57f698d",
+        "x": 1630,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "wt0c888888888888",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse/phases_connected → Phasen-Konfig (p1b78)",
+        "func": "var s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.phases !== \"number\") return null;\nif (s.phases !== 1 && s.phases !== 3) return null;\nflow.set(\"phasen\", s.phases);\nvar H = (global.get(\"haspPlate\") || \"openhasp\");\nvar eff = flow.get(\"phasenLive\");\nif (eff !== 1 && eff !== 3) eff = flow.get(\"phasen\");\nvar p1 = (eff === 1), p3 = (eff === 3);\nvar val = (p1) ? 0 : 1;\nreturn [[\n        { topic: \"hasp/\" + H + \"/command/p1b78.val\", payload: val },\n        // Suffix-Semantik (Styling-Doku): 4X = Teil 4 (Buttons), 2. Ziffer = State.\n        // 41 = toggled/gecheckt -> aktiver Knopf (folgt `val`), 40 = default (alle Knöpfe normal).\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_color40\", payload: \"#ffffff\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_grad_color40\", payload: \"#ffffff\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.text_color40\", payload: \"#374151\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_color41\", payload: \"#0d6efd\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_grad_color41\", payload: \"#0d6efd\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.text_color41\", payload: \"white\" }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 660,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c999999999999",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "meter config merken (Anzeigename)",
+        "func": "var parts = String(msg.topic || \"\").split(\"/\");\nvar slot = parseInt(parts[parts.length - 2], 10);\nif (!isFinite(slot) || slot < 0 || slot > 4) return null;\nvar c = msg.payload;\nif (typeof c === \"string\") { try { c = JSON.parse(c); } catch (e) { return null; } }\nvar name = null;\nif (Array.isArray(c)) {\n    if (c[1] && typeof c[1] === \"object\" && typeof c[1].display_name === \"string\") name = c[1].display_name;\n} else if (c && typeof c === \"object\") {\n    if (typeof c.display_name === \"string\") name = c.display_name;\n    else if (c[1] && typeof c[1] === \"object\" && typeof c[1].display_name === \"string\") name = c[1].display_name;\n}\nif (name) flow.set(\"meterName_\" + slot, name);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1490,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "wt0c57ab0001",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "mqtt/state → Verbindung",
+        "func": "var s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.connection_state !== \"number\") return null;\nflow.set(\"warpConn\", s.connection_state);\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 320,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0c57ab0002",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse/low_level_state → Phasen live (p1b78)",
+        "func": "var s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.phases_current !== \"number\") return null;\nvar H = (global.get(\"haspPlate\") || \"openhasp\");\n// Phasenanzeige: nur während des Ladens zählt die tatsächliche Phasenzahl\n// (phases_current). Ohne aktive Ladung zeigt das Display \"1-phasig\" – auch wenn\n// die Zuleitung 3-phasig ist und die Kontaktoren geschlossen bleiben.\nvar st = flow.get(\"warpState\");\nvar ph = 1;   // Standard ohne Ladung: 1-phasig\nif (st && st.charger_state === 3 && (s.phases_current === 1 || s.phases_current === 3)) {\n    ph = s.phases_current;\n}\nflow.set(\"phasenLive\", ph);\nvar p1 = (ph === 1), p3 = (ph === 3);\nvar val = (p1) ? 0 : 1;\nreturn [[\n        { topic: \"hasp/\" + H + \"/command/p1b78.val\", payload: val },\n        // Suffix-Semantik (Styling-Doku): 4X = Teil 4 (Buttons), 2. Ziffer = State.\n        // 41 = toggled/gecheckt -> aktiver Knopf (folgt `val`), 40 = default (alle Knöpfe normal).\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_color40\", payload: \"#ffffff\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_grad_color40\", payload: \"#ffffff\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.text_color40\", payload: \"#374151\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_color41\", payload: \"#0d6efd\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.bg_grad_color41\", payload: \"#0d6efd\" },\n        { topic: \"hasp/\" + H + \"/command/p1b78.text_color41\", payload: \"white\" }\n]];",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 360,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0d57ab0003",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Phasenumschaltung (p1b78) → external_control_update",
+        "func": "var v = Number(msg.payload && msg.payload.val);\nif (v !== 0 && v !== 1) return null;   // btnmatrix: 0=1-phasig, 1=3-phasig; deselect/anderes ignorieren\nvar phases = (v === 1) ? 3 : 1;\nmsg.payload = { phases_wanted: phases };\nmsg.topic = (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/power_manager/external_control_update\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 440,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000001",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse-State periodisch → Anzeige (cached)",
+        "func": "// Watchdog-Takt (15 s): gecachten evse/state erneut in die Anzeige geben,\n// damit kW-/Phasen-/Statuswerte auch ohne State-Änderung (evse/state publiziert nur bei\n// Änderung, retained) und nach Neustart aktuell bleiben. Nur bei bestätigter Verbindung\n// (connection_state == 2), damit kein künstlich frisch gehaltener lastWarp-Zeitstempel\n// den offline-Fallback (kein WARP-Frame > ~100 s) aushebelt.\nvar conn = flow.get(\"warpConn\");\nif (conn !== 2) return null;\nvar st = flow.get(\"warpState\");\nif (!st || typeof st !== \"object\") return null;\nreturn { payload: st };",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 840,
+        "wires": [
+            [
+                "wt0c222222222222"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000002",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse/management_current → Konfig (p2b27)",
+        "func": "var H = (global.get(\"haspPlate\") || \"openhasp\");\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.current !== \"number\") return null;\nvar a = Math.round(s.current / 1000) + \" A\";\nvar col = (s.current > 0) ? \"#111827\" : \"#9ca3af\";\n// Achtung: doppelte Klammer noetig! Ein Function-Knoten mit EINEM Ausgang\n// verwirft bei \"return [m1, m2, ...]\" alle Nachrichten ausser der ersten\n// (Array-Index = Ausgang, siehe Node.prototype.send in @node-red/runtime 4.0.2).\nreturn [[\n    { topic: \"hasp/\" + H + \"/command/p2b27.text\", payload: a },\n    { topic: \"hasp/\" + H + \"/command/p2b27.text_color\", payload: col }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 620,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000003",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "evse/external_current|automation_current → Konfig (p2b23, min)",
+        "func": "var H = (global.get(\"haspPlate\") || \"openhasp\");\nvar t = msg.topic || \"\";\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.current !== \"number\") return null;\n// Quelle merken und den jeweiligen Quellwert im Cache ablegen\nif (/\\/evse\\/external_current$/.test(t)) flow.set(\"extCur\", s.current);\nelse if (/\\/evse\\/automation_current$/.test(t)) flow.set(\"autoCur\", s.current);\nelse return null;\n// Effektiven Wert waehlen: der kleinere von beiden (falls beide bekannt), sonst der bekannte\nvar ext = flow.get(\"extCur\"), auto = flow.get(\"autoCur\"), eff;\nif (typeof ext === \"number\" && typeof auto === \"number\") eff = Math.min(ext, auto);\nelse if (typeof ext === \"number\") eff = ext;\nelse eff = auto;\nif (typeof eff !== \"number\") return null;\nflow.set(\"effCur\", eff);   // Basis fuer die ±1-A-Tasten = effektiver (kleinerer) Wert\nvar a = Math.round(eff / 1000) + \" A\";\nvar col = (eff > 0) ? \"#111827\" : \"#9ca3af\";\n// Achtung: doppelte Klammer noetig! Ein Function-Knoten mit EINEM Ausgang\n// verwirft bei \"return [m1, m2, ...]\" alle Nachrichten ausser der ersten\n// (Array-Index = Ausgang, siehe Node.prototype.send in @node-red/runtime 4.0.2).\nreturn [[\n    { topic: \"hasp/\" + H + \"/command/p2b23.text\", payload: a },\n    { topic: \"hasp/\" + H + \"/command/p2b23.text_color\", payload: col }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1130,
+        "y": 740,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000004",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Ladestrom −1 A (p2b31) → evse/external_current",
+        "func": "if (!(msg.payload && msg.payload.event === \"down\")) return null;\nvar H = (global.get(\"haspPlate\") || \"openhasp\");\nvar c = flow.get(\"effCur\");\nif (typeof c !== \"number\" || !isFinite(c)) c = 16000;   // noch kein Wert gesehen\nc = Math.max(6000, c - 1000);\nflow.set(\"effCur\", c);\n// Achtung: doppelte Klammer noetig! Ein Function-Knoten mit EINEM Ausgang\n// verwirft bei \"return [m1, m2, ...]\" alle Nachrichten ausser der ersten\n// (Array-Index = Ausgang, siehe Node.prototype.send in @node-red/runtime 4.0.2).\nreturn [[\n    { topic: (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/evse/external_current\", payload: { current: c } },\n    { topic: (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/evse/automation_current_update\", payload: { current: c } },\n    { topic: \"hasp/\" + H + \"/command/p2b23.text\", payload: Math.round(c / 1000) + \" A\" }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 820,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000005",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Ladestrom +1 A (p2b32) → evse/external_current",
+        "func": "if (!(msg.payload && msg.payload.event === \"down\")) return null;\nvar H = (global.get(\"haspPlate\") || \"openhasp\");\nvar c = flow.get(\"effCur\");\nif (typeof c !== \"number\" || !isFinite(c)) c = 16000;   // noch kein Wert gesehen\nc = Math.min(32000, c + 1000);\nflow.set(\"effCur\", c);\n// Achtung: doppelte Klammer noetig! Ein Function-Knoten mit EINEM Ausgang\n// verwirft bei \"return [m1, m2, ...]\" alle Nachrichten ausser der ersten\n// (Array-Index = Ausgang, siehe Node.prototype.send in @node-red/runtime 4.0.2).\nreturn [[\n    { topic: (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/evse/external_current\", payload: { current: c } },\n    { topic: (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/evse/automation_current_update\", payload: { current: c } },\n    { topic: \"hasp/\" + H + \"/command/p2b23.text\", payload: Math.round(c / 1000) + \" A\" }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 860,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0h000000000001",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Hardware-Obergrenze → external_defaults_update",
+        "func": "// Jumper-/Schalter-Obergrenze der Zuleitung (evse/hardware_configuration) als\n// Default des externen Slots (evse/external_defaults) vorbelegen: Nach einem\n// Neustart des Charge-Controllers gilt dann die Hardware-Obergrenze.\n// jumper_configuration: 0-6 -> 6..32 A; 7=Software; 8=nicht konfiguriert.\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\" || typeof s.jumper_configuration !== \"number\") return null;\nvar limit = [6000, 10000, 13000, 16000, 20000, 25000, 32000][s.jumper_configuration];\nif (limit === undefined || limit === null) return null;   // Software/nicht konfiguriert -> nichts ändern\nif (flow.get(\"extDefaultLim\") === limit) return null;     // bereits gesetzt\nflow.set(\"extDefaultLim\", limit);\nreturn {\n    topic: (global.get(\"warpDev\") || \"warp3/AbCd\") + \"/evse/external_defaults_update\",\n    payload: { current: limit, clear_on_disconnect: false }\n};\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 120,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000006",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Solar-Rest (wh_today_remaining) → Leistung (p1b23)",
+        "func": "// solar_forecast/state.wh_today_remaining → Leistung (p1b23): \"0,0 kWh\" (bei 0 ausgeblendet via .vis)\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s.wh_today_remaining !== \"number\") return null;\nvar H = global.get(\"haspPlate\") || \"openhasp\";\nvar vis = (s.wh_today_remaining !== 0);\nvar txt = vis ? \"\\uE599 \" + (s.wh_today_remaining / 1000).toFixed(1).replace(\".\", \",\") + \" kWh\" : \"\";  // Sonnen-Icon vor dem Wert\nreturn [[\n    { topic: \"hasp/\" + H + \"/command/p1b23.text\", payload: txt },\n    { topic: \"hasp/\" + H + \"/command/p1b23.vis\", payload: String(vis) }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1100,
+        "y": 580,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "wt0g000000000007",
+        "type": "function",
+        "z": "wt50cef7629f8e5a01",
+        "name": "Titelzeile (info/name + display_name) → p0b13",
+        "func": "// info/display_name (falls gesetzt) sonst info/name → Kopfzeile (p0b13, Titelzeile)\nvar s = msg.payload;\nif (typeof s === \"string\") { try { s = JSON.parse(s); } catch (e) { return null; } }\nif (!s || typeof s !== \"object\") return null;\nif (/\\/info\\/display_name$/.test(msg.topic || \"\")) {\n    // Anzeigename merken; leerer Wert = Löschen → Fallback auf Gerätename\n    flow.set(\"dispName\", (typeof s.display_name === \"string\") ? s.display_name.trim() : \"\");\n} else if (typeof s.name === \"string\") {\n    flow.set(\"devName\", s.name);\n}\nvar disp = flow.get(\"dispName\");\nvar name = flow.get(\"devName\");\nvar display = (disp && disp.length > 0) ? disp : name;\nif (!display) return null;\nmsg.payload = display;\nmsg.topic = \"hasp/\" + (global.get(\"haspPlate\") || \"openhasp\") + \"/command/p0b13.text\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1080,
+        "y": 780,
+        "wires": [
+            [
+                "wtf00a4321b0d4c2e0"
+            ]
+        ]
+    },
+    {
+        "id": "e7409604a57f698d",
+        "type": "mqtt-broker",
+        "name": "controller",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

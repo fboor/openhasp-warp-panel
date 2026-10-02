@@ -1,0 +1,107 @@
+{"page": 0, "comment": "--------> WARP Header + Sidebar (persistent) <--------"}
+{"id": 1, "obj": "obj", "x": 0, "y": 0, "w": 800, "h": 56, "bg_color": "#555555", "radius": 0, "border_side": 0, "bg_grad_dir": 0}
+{"id": 11, "parentid": 1, "obj": "img", "x": 12, "y": 14, "w": 215, "h": 28, "src": "L:/warp-logo.png", "auto_size": 0}
+{"id": 12, "parentid": 1, "obj": "label", "x": 636, "y": 10, "w": 154, "h": 36, "text": "--:--", "template": "%H:%M", "text_color": "white", "align": "right", "text_font": 30}
+{"id": 13, "parentid": 1, "obj": "label", "x": 256, "y": 10, "w": 260, "h": 36, "text": "--", "text_color": "white", "align": "left", "text_font": 24}
+{"id": 4, "obj": "obj", "x": 0, "y": 56, "w": 140, "h": 424, "bg_color": "#eeeff1", "border_color": "#e5e7eb", "border_width": 1, "border_side": 8, "radius": 0, "bg_grad_dir": 0}
+{"id": 51, "parentid": 4, "obj": "btn", "x": 8, "y": 56, "w": 124, "h": 52, "action": {"down": "page 1"}, "text": "Status", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff", "bg_color02": "#0d6efd", "bg_grad_color02": "#0d6efd", "bg_grad_dir02": 0, "text_color02": "#ffffff"}
+{"id": 52, "parentid": 4, "obj": "btn", "x": 8, "y": 184, "w": 124, "h": 52, "action": {"down": "page 3"}, "text": "Ladestatus", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff", "bg_color02": "#0d6efd", "bg_grad_color02": "#0d6efd", "bg_grad_dir02": 0, "text_color02": "#ffffff"}
+{"id": 53, "parentid": 4, "obj": "btn", "x": 8, "y": 248, "w": 124, "h": 52, "action": {"down": "page 4"}, "text": "Zähler", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff", "bg_color02": "#0d6efd", "bg_grad_color02": "#0d6efd", "bg_grad_dir02": 0, "text_color02": "#ffffff"}
+{"id": 54, "parentid": 4, "obj": "btn", "x": 8, "y": 120, "w": 124, "h": 52, "action": {"down": "page 2"}, "text": "Konfig", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff", "bg_color02": "#0d6efd", "bg_grad_color02": "#0d6efd", "bg_grad_dir02": 0, "text_color02": "#ffffff"}
+{"id": 90, "obj": "label", "x": 8, "y": 340, "w": 120, "h": 125, "text": "\uE10B", "text_font": 127, "text_color": "#6b7280", "align": "center"}
+{"page": 1, "comment": "--------> Status (Laden) <--------"}
+{"id": 1, "obj": "obj", "x": 140, "y": 56, "w": 660, "h": 424, "bg_color": "#f8f9fb", "radius": 0, "bg_grad_dir": 0}
+{"id": 2, "obj": "obj", "x": 141, "y": 56, "w": 660, "h": 50, "bg_color": "#ffffff", "border_width": 1, "border_side": 2, "border_color": "#e5e7eb", "radius": 0, "bg_grad_dir": 0}
+{"id": 3, "parentid": 2, "obj": "label", "x": 20, "y": 10, "w": 300, "h": 30, "text": "Status", "text_color": "#111827", "align": "left", "text_font": 28}
+{"id": 5, "obj": "obj", "x": 160, "y": 116, "w": 620, "h": 150, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 50, "parentid": 5, "obj": "label", "x": 14, "y": 9, "w": 300, "h": 30, "text": "Lademodus", "text_color": "#374151", "align": "left", "text_font": 24}
+{"id": 42, "parentid": 5, "obj": "btnmatrix", "x": 16, "y": 46, "w": 588, "h": 72, "text_font": 24, "radius": 0, "border_width": 0, "bg_color": "#ffffff", "bg_grad_dir": 0, "radius40": 8, "bg_color40": "#0d6efd", "bg_grad_color40": "#0d6efd", "text_color40": "#ffffff", "bg_grad_dir40": 0, "bg_color41": "#6ab190", "bg_grad_color41": "#6ab190", "text_color41": "#ffffff", "bg_color43": "#6ab190", "bg_grad_color43": "#6ab190", "text_color43": "#ffffff", "toggle": 1, "one_check": 1, "options": ["Aus", "Solar", "Minimum", "Schnell"], "bg_grad_color": "#ffffff"}
+{"id": 6, "obj": "obj", "x": 160, "y": 280, "w": 300, "h": 180, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 60, "parentid": 6, "obj": "label", "x": 14, "y": 9, "w": 300, "h": 34, "text": "Leistung", "text_color": "#374151", "align": "left", "text_font": 24}
+{"id": 22, "parentid": 6, "obj": "label", "x": 0, "y": 58, "w": 300, "h": 64, "text": "0,0 kW", "text_color": "#111827", "align": "center", "text_font": 48}
+{"id": 23, "parentid": 6, "obj": "label", "x": 90, "y": 142, "w": 210, "h": 30, "text": "0,0 kWh", "text_color": "#6b7280", "align": "right", "text_font": 20}
+{"id": 7, "obj": "obj", "x": 480, "y": 280, "w": 300, "h": 180, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 70, "parentid": 7, "obj": "label", "x": 14, "y": 9, "w": 270, "h": 30, "text": "Ladestatus", "text_color": "#374151", "align": "left", "text_font": 24}
+{"id": 12, "parentid": 7, "obj": "label", "x": 10, "y": 46, "w": 280, "h": 34, "text": "--", "text_color": "#111827", "align": "center", "text_font": 28}
+{"id": 13, "parentid": 7, "obj": "label", "x": 10, "y": 86, "w": 280, "h": 34, "text": "--", "text_color": "#6b7280", "align": "center", "text_font": 24}
+{"id": 78, "parentid": 7, "obj": "btnmatrix", "x": 10, "y": 122, "w": 280, "h": 52, "text_font": 24, "radius": 3, "border_width": 0, "bg_color": "#ffffff", "bg_grad_color": "#ffffff", "bg_grad_dir": 0, "radius40": 8, "bg_color40": "#ffffff", "bg_grad_color40": "#ffffff", "text_color40": "#374151", "bg_grad_dir40": 0, "radius41": 8, "bg_color41": "#0d6efd", "bg_grad_color41": "#0d6efd", "text_color41": "#ffffff", "bg_grad_dir41": 0, "toggle": 1, "one_check": 1, "options": ["1-phasig", "3-phasig"]}
+{"page": 2, "comment": "--------> Konfig (Ladestrom) <--------"}
+{"id": 1, "obj": "obj", "x": 140, "y": 56, "w": 660, "h": 424, "bg_color": "#f8f9fb", "radius": 0, "bg_grad_dir": 0}
+{"id": 2, "obj": "obj", "x": 141, "y": 56, "w": 660, "h": 50, "bg_color": "#ffffff", "border_width": 1, "border_side": 2, "border_color": "#e5e7eb", "radius": 0, "bg_grad_dir": 0}
+{"id": 25, "parentid": 2, "obj": "label", "x": 20, "y": 7, "w": 300, "h": 36, "text": "Konfig", "text_color": "#111827", "align": "left", "text_font": 28}
+{"id": 21, "obj": "obj", "x": 160, "y": 116, "w": 330, "h": 160, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 22, "parentid": 21, "obj": "label", "x": 14, "y": 9, "w": 300, "h": 30, "text": "Ladestrom (extern)", "text_color": "#374151", "align": "left", "text_font": 24}
+{"id": 23, "parentid": 21, "obj": "label", "x": 0, "y": 48, "w": 330, "h": 60, "text": "-- A", "text_color": "#111827", "align": "center", "text_font": 48}
+{"id": 31, "parentid": 21, "obj": "btn", "x": 18, "y": 116, "w": 140, "h": 38, "text": "-1 A", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff"}
+{"id": 32, "parentid": 21, "obj": "btn", "x": 172, "y": 116, "w": 140, "h": 38, "text": "+1 A", "text_color": "#1f2937", "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 8, "text_font": 24, "bg_grad_color": "#ffffff"}
+{"id": 24, "obj": "obj", "x": 510, "y": 116, "w": 270, "h": 160, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 26, "parentid": 24, "obj": "label", "x": 14, "y": 9, "w": 240, "h": 30, "text": "Lastmanagement", "text_color": "#374151", "align": "left", "text_font": 24}
+{"id": 27, "parentid": 24, "obj": "label", "x": 0, "y": 48, "w": 270, "h": 60, "text": "-- A", "text_color": "#111827", "align": "center", "text_font": 48}
+{"id": 28, "parentid": 24, "obj": "label", "x": 14, "y": 122, "w": 240, "h": 30, "text": "vom Lastmanagement", "text_color": "#9ca3af", "align": "left", "text_font": 24}
+{"id": 29, "obj": "label", "x": 160, "y": 288, "w": 330, "h": 30, "text": "externer Ladestrom: 6-32 A", "text_color": "#9ca3af", "align": "left", "text_font": 24}
+{"page": 3, "comment": "--------> Ladestatus <--------"}
+{"id": 1, "obj": "obj", "x": 140, "y": 56, "w": 660, "h": 424, "bg_color": "#f8f9fb", "radius": 0, "bg_grad_dir": 0}
+{"id": 2, "obj": "obj", "x": 141, "y": 56, "w": 660, "h": 50, "bg_color": "#ffffff", "border_width": 1, "border_side": 2, "border_color": "#e5e7eb", "radius": 0, "bg_grad_dir": 0}
+{"id": 21, "parentid": 2, "obj": "label", "x": 20, "y": 10, "w": 300, "h": 30, "text": "Ladestatus", "text_color": "#111827", "align": "left", "text_font": 28}
+{"id": 3, "obj": "obj", "x": 160, "y": 116, "w": 620, "h": 330, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 30, "parentid": 3, "obj": "label", "x": 18, "y": 20, "w": 180, "h": 30, "text": "IEC 61851", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 11, "parentid": 3, "obj": "label", "x": 210, "y": 19, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 31, "parentid": 3, "obj": "label", "x": 18, "y": 72, "w": 180, "h": 34, "text": "Laderegler", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 12, "parentid": 3, "obj": "label", "x": 210, "y": 71, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 32, "parentid": 3, "obj": "label", "x": 18, "y": 124, "w": 180, "h": 30, "text": "Kontaktor", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 13, "parentid": 3, "obj": "label", "x": 210, "y": 123, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 33, "parentid": 3, "obj": "label", "x": 18, "y": 176, "w": 180, "h": 30, "text": "Fehler", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 14, "parentid": 3, "obj": "label", "x": 210, "y": 175, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 34, "parentid": 3, "obj": "label", "x": 18, "y": 228, "w": 180, "h": 34, "text": "Freigegeben", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 15, "parentid": 3, "obj": "label", "x": 210, "y": 227, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 35, "parentid": 3, "obj": "label", "x": 18, "y": 280, "w": 180, "h": 34, "text": "Temperatur", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 16, "parentid": 3, "obj": "label", "x": 210, "y": 279, "w": 390, "h": 34, "text": "--", "text_color": "#111827", "align": "right", "text_font": 28}
+{"id": 61, "parentid": 3, "obj": "obj", "x": 18, "y": 58, "w": 584, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 62, "parentid": 3, "obj": "obj", "x": 18, "y": 110, "w": 584, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 63, "parentid": 3, "obj": "obj", "x": 18, "y": 162, "w": 584, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 64, "parentid": 3, "obj": "obj", "x": 18, "y": 214, "w": 584, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 65, "parentid": 3, "obj": "obj", "x": 18, "y": 266, "w": 584, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"page": 4, "comment": "--------> Zähler (Tabelle, bis 5 Zähler) <--------"}
+{"id": 1, "obj": "obj", "x": 140, "y": 56, "w": 660, "h": 424, "bg_color": "#f8f9fb", "radius": 0, "bg_grad_dir": 0}
+{"id": 2, "obj": "obj", "x": 141, "y": 56, "w": 660, "h": 50, "bg_color": "#ffffff", "border_width": 1, "border_side": 2, "border_color": "#e5e7eb", "radius": 0, "bg_grad_dir": 0}
+{"id": 24, "parentid": 2, "obj": "label", "x": 20, "y": 10, "w": 300, "h": 30, "text": "Zähler", "text_color": "#111827", "align": "left", "text_font": 28}
+{"id": 10, "obj": "obj", "x": 144, "y": 116, "w": 652, "h": 354, "bg_color": "#ffffff", "border_color": "#e5e7eb", "border_width": 1, "radius": 3, "bg_grad_dir": 0}
+{"id": 111, "parentid": 10, "obj": "label", "x": 8, "y": 11, "w": 200, "h": 34, "text": "Anzeigename", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 112, "parentid": 10, "obj": "label", "x": 208, "y": 11, "w": 130, "h": 34, "text": "Leistung", "text_color": "#6b7280", "align": "right", "text_font": 24}
+{"id": 113, "parentid": 10, "obj": "label", "x": 338, "y": 11, "w": 140, "h": 34, "text": "Ladestand", "text_color": "#6b7280", "align": "right", "text_font": 24}
+{"id": 116, "parentid": 10, "obj": "label", "x": 584, "y": 11, "w": 58, "h": 34, "text": "Phasen", "text_color": "#6b7280", "align": "left", "text_font": 24}
+{"id": 120, "parentid": 10, "obj": "obj", "x": 8, "y": 50, "w": 640, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 201, "parentid": 10, "obj": "label", "x": 8, "y": 61, "w": 200, "h": 30, "text": "Zähler #0", "text_color": "#111827", "align": "left", "text_font": 24}
+{"id": 211, "parentid": 10, "obj": "label", "x": 208, "y": 61, "w": 130, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 221, "parentid": 10, "obj": "label", "x": 338, "y": 61, "w": 140, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 180, "parentid": 10, "obj": "obj", "x": 584, "y": 69, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 181, "parentid": 10, "obj": "obj", "x": 604, "y": 69, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 182, "parentid": 10, "obj": "obj", "x": 624, "y": 69, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 121, "parentid": 10, "obj": "obj", "x": 8, "y": 100, "w": 640, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 202, "parentid": 10, "obj": "label", "x": 8, "y": 115, "w": 200, "h": 30, "text": "Zähler #1", "text_color": "#111827", "align": "left", "text_font": 24}
+{"id": 212, "parentid": 10, "obj": "label", "x": 208, "y": 115, "w": 130, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 222, "parentid": 10, "obj": "label", "x": 338, "y": 115, "w": 140, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 183, "parentid": 10, "obj": "obj", "x": 584, "y": 123, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 184, "parentid": 10, "obj": "obj", "x": 604, "y": 123, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 185, "parentid": 10, "obj": "obj", "x": 624, "y": 123, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 122, "parentid": 10, "obj": "obj", "x": 8, "y": 154, "w": 640, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 203, "parentid": 10, "obj": "label", "x": 8, "y": 169, "w": 200, "h": 30, "text": "Zähler #2", "text_color": "#111827", "align": "left", "text_font": 24}
+{"id": 213, "parentid": 10, "obj": "label", "x": 208, "y": 169, "w": 130, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 223, "parentid": 10, "obj": "label", "x": 338, "y": 169, "w": 140, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 186, "parentid": 10, "obj": "obj", "x": 584, "y": 177, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 187, "parentid": 10, "obj": "obj", "x": 604, "y": 177, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 188, "parentid": 10, "obj": "obj", "x": 624, "y": 177, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 123, "parentid": 10, "obj": "obj", "x": 8, "y": 208, "w": 640, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 204, "parentid": 10, "obj": "label", "x": 8, "y": 223, "w": 200, "h": 30, "text": "Zähler #3", "text_color": "#111827", "align": "left", "text_font": 24}
+{"id": 214, "parentid": 10, "obj": "label", "x": 208, "y": 223, "w": 130, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 224, "parentid": 10, "obj": "label", "x": 338, "y": 223, "w": 140, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 189, "parentid": 10, "obj": "obj", "x": 584, "y": 231, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 190, "parentid": 10, "obj": "obj", "x": 604, "y": 231, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 191, "parentid": 10, "obj": "obj", "x": 624, "y": 231, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 124, "parentid": 10, "obj": "obj", "x": 8, "y": 262, "w": 640, "h": 2, "bg_color": "#e5e7eb", "radius": 1, "border_side": 0, "bg_grad_dir": 0}
+{"id": 205, "parentid": 10, "obj": "label", "x": 8, "y": 277, "w": 200, "h": 30, "text": "Zähler #4", "text_color": "#111827", "align": "left", "text_font": 24}
+{"id": 215, "parentid": 10, "obj": "label", "x": 208, "y": 277, "w": 130, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 225, "parentid": 10, "obj": "label", "x": 338, "y": 277, "w": 140, "h": 30, "text": "--", "text_color": "#111827", "align": "right", "text_font": 24}
+{"id": 192, "parentid": 10, "obj": "obj", "x": 584, "y": 285, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 193, "parentid": 10, "obj": "obj", "x": 604, "y": 285, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
+{"id": 194, "parentid": 10, "obj": "obj", "x": 624, "y": 285, "w": 16, "h": 16, "bg_color": "#9ca3af", "radius": 3, "border_side": 0, "bg_grad_dir": 0}
