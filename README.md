@@ -1,5 +1,7 @@
 # warp-hasp-display
 
+**English** · [Deutsch](README.de.md)
+
 A touch-panel user interface for [Tinkerforge WARP](https://warp-charger.com) EV chargers,
 built for [openHASP](https://github.com/HASwitchPlate/openHASP) plates with an 800×480 display.
 
